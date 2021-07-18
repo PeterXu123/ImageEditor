@@ -1,0 +1,16 @@
+test1.txt
+imageDithering 
+imageBlur 
+imageSharpening 
+imageSepiaTone 
+imageGreyScale 
+highlightEdgeGrey 
+checkerboard 4 100
+rainbow 100 100 false 
+rainbow 100 100 true 
+test1.txt
+France 100
+Norway 100
+Switzerland 200
+Greece 250
+mosaicscontrast

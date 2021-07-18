@@ -1,0 +1,571 @@
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+
+import javax.swing.*;
+
+import images.ImageUtilities;
+
+public class ImageView extends JFrame implements ViewInterface {
+
+  private JLabel imagePicture;
+  private JButton blurButton;
+  private JButton sharpenButton;
+  private JButton greyScaleButton;
+  private JButton sepiaButton;
+  private JButton highlightEdgeButton;
+  private JButton ditherButton;
+  private JButton mosaicsButton;
+  private JButton equalizationButton;
+  private JButton redEyeRemovalButton;
+  private JButton rainbowButton;
+  private JButton checkerboardButton;
+  private JButton loadButton;
+  private JButton storeButton;
+  private JScrollPane jp;
+  public ImageView(String caption) {
+    super(caption);
+    setSize(800, 800);
+    setLocation(500, 0);
+    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    this.setLayout(new FlowLayout());
+    blurButton = new JButton("blur");
+    blurButton.setActionCommand("blur");
+    this.add(blurButton);
+
+    sharpenButton = new JButton("sharpen");
+    sharpenButton.setActionCommand("sharpen");
+    this.add(sharpenButton);
+
+    greyScaleButton = new JButton("greyScale");
+    greyScaleButton.setActionCommand("greyScale");
+    this.add(greyScaleButton);
+
+    sepiaButton = new JButton("sepia");
+    sepiaButton.setActionCommand("sepia");
+    this.add(sepiaButton);
+
+    highlightEdgeButton = new JButton("highlightEdge");
+    highlightEdgeButton.setActionCommand("highlightEdge");
+    this.add(highlightEdgeButton);
+
+    ditherButton = new JButton("dithering");
+    ditherButton.setActionCommand("dithering");
+    this.add(ditherButton);
+
+    mosaicsButton = new JButton("mosaics");
+    mosaicsButton.setActionCommand("mosaics");
+    this.add(mosaicsButton);
+
+    equalizationButton = new JButton("equalization");
+    equalizationButton.setActionCommand("equalization");
+    this.add(equalizationButton);
+
+    redEyeRemovalButton = new JButton("remove red eyes");
+    redEyeRemovalButton.setActionCommand("remove red eyes");
+    this.add(redEyeRemovalButton);
+
+    rainbowButton = new JButton("rainbow");
+    rainbowButton.setActionCommand("rainbow");
+    this.add(rainbowButton);
+
+    checkerboardButton = new JButton("checkerboard");
+    checkerboardButton.setActionCommand("checkerboard");
+    this.add(checkerboardButton);
+
+    loadButton = new JButton("load");
+    loadButton.setActionCommand("load");
+    this.add(loadButton);
+
+
+    storeButton = new JButton("store");
+    storeButton.setActionCommand("store");
+    this.add(storeButton);
+
+    BufferedImage image = ImageUtilities.toBufferImage(new int[1200][1200][3]);
+    imagePicture = new JLabel(new ImageIcon(image));
+    jp = new JScrollPane(imagePicture);
+    jp.setPreferredSize(new Dimension(500, 500));
+    this.getContentPane().add(jp);
+    this.pack();
+    setVisible(true);
+
+  }
+
+
+
+  @Override
+  public void resetFocus() {
+    this.setFocusable(true);
+    this.requestFocus();
+
+  }
+
+  @Override
+  public void setFeatures(Features f) {
+    blurButton.addActionListener(l -> f.imageBlur());
+    sharpenButton.addActionListener(l -> f.imageSharpening());
+    sepiaButton.addActionListener(l -> f.imageSepiaTone());
+    ditherButton.addActionListener(l -> f.imageDithering());
+    mosaicsButton.addActionListener(
+        new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            String seed = JOptionPane.showInputDialog("Give seed that is an integer");
+            int seed1 = -1;
+            try {
+              seed1 = Integer.parseInt(seed);
+              f.imageMosaicing(seed1);
+            } catch (Exception ex) {
+              System.out.println("You give incorrect seed");
+            }
+          }
+        });
+    highlightEdgeButton.addActionListener(l -> f.highlightEdgeGrey());
+    equalizationButton.addActionListener(l -> f.histogramEqualization());
+    greyScaleButton.addActionListener(l -> f.imageGreyScale());
+    loadButton.addActionListener(
+        new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            String inputPath = JOptionPane.showInputDialog("Give absolute image path");
+            System.out.println("Here");
+            try {
+              f.loadImage(inputPath);
+            } catch (IOException ex) {
+              ex.printStackTrace();
+            }
+          }
+        });
+
+    storeButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        String outputPath = JOptionPane.showInputDialog("Give absolute image path");
+        try {
+          f.loadImage(outputPath);
+        } catch (IOException ex) {
+          ex.printStackTrace();
+        }
+      }
+    });
+
+//    loadButton.addActionListener(l -> );
+
+
+
+  }
+
+  @Override
+  public void setImage(int[][][] imageData) {
+    BufferedImage image = ImageUtilities.toBufferImage(imageData);
+    System.out.println(image.getHeight());
+    imagePicture.setIcon(new ImageIcon(image));
+//    jp.updateUI();
+    update();
+  }
+
+  private void update() {
+    this.repaint();
+
+  }
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.nio.charset.Charset;
+
+import javax.swing.*;
+import javax.swing.border.LineBorder;
+
+import images.ImageUtilities;
+
+public class ImageView extends JFrame implements ViewInterface {
+  private int initX;
+  private int initY;
+  private int endX;
+  private int endY;
+  private JLabel notification;
+  private JLabel imagePicture;
+  private JButton blurButton;
+  private JButton sharpenButton;
+  private JButton greyScaleButton;
+  private JButton sepiaButton;
+  private JButton highlightEdgeButton;
+  private JButton ditherButton;
+  private JButton mosaicsButton;
+  private JButton equalizationButton;
+  private JButton redEyeRemovalButton;
+  private JButton rainbowButton;
+  private JButton rainbowButton1;
+  private JButton checkerboardButton;
+  private JButton loadButton;
+  private JButton storeButton;
+  private JButton scriptButton;
+  private JScrollPane jp;
+  private JPanel midPanel;
+  private JPanel eastPanel;
+  private JButton runScriptButton;
+  private JTextArea textArea;
+  public ImageView(String caption) {
+    super(caption);
+
+    initX = -1;
+    initY = -1;
+    endX = -1;
+    endY = -1;
+    setPreferredSize(new Dimension(1250, 600));
+    setLocation(500, 0);
+    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    blurButton = new JButton("blur");
+    blurButton.setActionCommand("blur");
+
+
+    sharpenButton = new JButton("sharpen");
+    sharpenButton.setActionCommand("sharpen");
+
+
+    greyScaleButton = new JButton("greyScale");
+    greyScaleButton.setActionCommand("greyScale");
+
+
+    sepiaButton = new JButton("sepia");
+    sepiaButton.setActionCommand("sepia");
+
+
+    highlightEdgeButton = new JButton("highlightEdge");
+    highlightEdgeButton.setActionCommand("highlightEdge");
+
+
+    ditherButton = new JButton("dithering");
+    ditherButton.setActionCommand("dithering");
+
+
+    mosaicsButton = new JButton("mosaics");
+    mosaicsButton.setActionCommand("mosaics");
+
+
+    equalizationButton = new JButton("equalization");
+    equalizationButton.setActionCommand("equalization");
+//    this.add(equalizationButton);
+
+    redEyeRemovalButton = new JButton("remove red eyes");
+    redEyeRemovalButton.setActionCommand("remove red eyes");
+//    this.add(redEyeRemovalButton);
+
+    rainbowButton = new JButton("horizontal rainbow");
+    rainbowButton.setActionCommand("horizontal rainbow");
+
+    rainbowButton1 = new JButton("vertical rainbow");
+    rainbowButton1.setActionCommand("vertical rainbow");
+
+
+//    this.add(rainbowButton);
+
+    checkerboardButton = new JButton("checkerboard");
+    checkerboardButton.setActionCommand("checkerboard");
+//    this.add(checkerboardButton);
+
+    loadButton = new JButton("load");
+    loadButton.setActionCommand("load");
+//    this.add(loadButton);
+
+
+    storeButton = new JButton("save");
+    storeButton.setActionCommand("store");
+//    this.add(storeButton);
+
+    scriptButton = new JButton("select script");
+    scriptButton.setActionCommand("script");
+
+    runScriptButton = new JButton("run script from text below ↓");
+//    runScriptButton.setPreferredSize(new Dimension(500, 20));
+
+
+    Container mainContainer = this.getContentPane();
+    mainContainer.setLayout(new BorderLayout(8, 6));
+
+    JPanel buttonModifyPanel = new JPanel();
+    buttonModifyPanel.setBorder(new LineBorder(Color.blue));
+    buttonModifyPanel.setLayout(new GridLayout(1, 9, 5, 5));
+    buttonModifyPanel.add(blurButton);
+    buttonModifyPanel.add(sharpenButton);
+    buttonModifyPanel.add(sepiaButton);
+    buttonModifyPanel.add(highlightEdgeButton);
+    buttonModifyPanel.add(greyScaleButton);
+    buttonModifyPanel.add(mosaicsButton);
+    buttonModifyPanel.add(ditherButton);
+    buttonModifyPanel.add(equalizationButton);
+    buttonModifyPanel.add(redEyeRemovalButton);
+    mainContainer.add(buttonModifyPanel, BorderLayout.NORTH);
+    midPanel = new JPanel();
+    midPanel.setLayout(new BorderLayout());
+    eastPanel = new JPanel();
+    eastPanel.setBackground(Color.PINK);
+    midPanel.setBorder(new LineBorder(Color.CYAN));
+    JPanel generateGrid = new JPanel();
+    generateGrid.setLayout(new GridLayout(3, 3, 10, 5));
+    generateGrid.add(loadButton);
+    generateGrid.add(storeButton);
+    generateGrid.add(checkerboardButton);
+    generateGrid.add(rainbowButton);
+    generateGrid.add(rainbowButton1);
+    generateGrid.add(scriptButton);
+    generateGrid.add(runScriptButton);
+    midPanel.add(generateGrid, BorderLayout.NORTH);
+    textArea = new JTextArea(10, 10);
+    JScrollPane sp = new JScrollPane(textArea);
+//    midPanel.add(new JLabel("text script"), BorderLayout.CENTER);
+    midPanel.add(sp, BorderLayout.CENTER);
+
+
+    BufferedImage image = ImageUtilities.toBufferImage(new int[1200][1200][3]);
+    imagePicture = new JLabel(new ImageIcon(image));
+
+    jp = new JScrollPane(imagePicture);
+    jp.setBorder(new LineBorder(Color.green));
+    jp.setPreferredSize(new Dimension(500, 500));
+    eastPanel.add(jp);
+//    eastPanel.setSize(new Dimension(500, 500));
+    eastPanel.setBorder(new LineBorder(Color.red));
+//    eastPanel.setPreferredSize(new Dimension(500, 500));
+//    midPanel.add(jp);
+    mainContainer.add(midPanel, BorderLayout.WEST);
+    mainContainer.add(eastPanel);
+    this.pack();
+    setVisible(true);
+
+  }
+
+
+
+  @Override
+  public void resetFocus() {
+    this.setFocusable(true);
+    this.requestFocus();
+
+  }
+
+  @Override
+  public void setFeatures(Features f) {
+    blurButton.addActionListener(l -> f.imageBlur());
+    sharpenButton.addActionListener(l -> f.imageSharpening());
+    sepiaButton.addActionListener(l -> f.imageSepiaTone());
+    ditherButton.addActionListener(l -> f.imageDithering());
+    mosaicsButton.addActionListener(
+        new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            String seed = JOptionPane.showInputDialog("Give seed that is an integer");
+            int seed1 = -1;
+            try {
+              seed1 = Integer.parseInt(seed);
+              f.imageMosaicing(seed1);
+              notification = new JLabel("Success");
+//              midPanel.add
+            } catch (Exception ex) {
+              System.out.println("You give incorrect seed");
+            }
+          }
+        });
+    highlightEdgeButton.addActionListener(l -> f.highlightEdgeGrey());
+    equalizationButton.addActionListener(l -> f.histogramEqualization());
+    greyScaleButton.addActionListener(l -> f.imageGreyScale());
+    loadButton.addActionListener(
+        new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            JFileChooser j = new JFileChooser();
+            j.showSaveDialog(null);
+            System.out.println("Here");
+            try {
+              f.loadImage(j.getSelectedFile().getAbsolutePath());
+            } catch (IOException ex) {
+              ex.printStackTrace();
+            }
+          }
+        });
+
+    rainbowButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        String height = JOptionPane.showInputDialog("Give the height of rainbow that should be greater than 7");
+        String width = JOptionPane.showInputDialog("Give the width of rainbow that should be greater than 0");
+        try {
+          f.generateRainbowStrips(Integer.parseInt(height), Integer.parseInt(width), true);
+        }
+        catch (Exception ex) {
+          ex.printStackTrace();
+        }
+      }
+    });
+
+    rainbowButton1.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        String height = JOptionPane.showInputDialog("Give the height of rainbow that should be greater than 0");
+        String width = JOptionPane.showInputDialog("Give the width of rainbow that should be greater than 7");
+        try {
+          f.generateRainbowStrips(Integer.parseInt(height), Integer.parseInt(width), false);
+        }
+        catch (Exception ex) {
+          ex.printStackTrace();
+        }
+      }
+    });
+
+    scriptButton.addActionListener(
+            new ActionListener() {
+              @Override
+              public void actionPerformed(ActionEvent e) {
+                JFileChooser j = new JFileChooser();
+                j.showSaveDialog(null);
+                System.out.println("Here");
+                try {
+                  File file = new File(j.getSelectedFile().getAbsolutePath());
+                  InputStream intputstream = new FileInputStream(file);
+                  InputStreamReader inputStreamReader =
+                          new InputStreamReader(intputstream, Charset.forName("UTF-8"));
+                  ImageControllerInterface controller = new ImageController(inputStreamReader);
+                  controller.getControl((ImageModelInterface) new ImageModel());
+                } catch (IOException ex) {
+                  ex.printStackTrace();
+                }
+              }
+            });
+    runScriptButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        String userText = textArea.getText();
+        Readable ed = new StringReader(userText);
+        try {
+          ImageControllerInterface controller = new ImageController(ed);
+          controller.getControl((ImageModelInterface) new ImageModel());
+
+        } catch (IOException ex) {
+          ex.printStackTrace();
+        }
+      }
+    });
+
+    storeButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        String outputPath = JOptionPane.showInputDialog("Give absolute image path");
+        try {
+          f.storeImage(outputPath);
+        } catch (IOException ex) {
+          ex.printStackTrace();
+        }
+      }
+    });
+
+    redEyeRemovalButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        f.removeRedEye(initX, endX, initY, endY);
+      }
+    });
+
+    checkerboardButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        String nsps = JOptionPane.showInputDialog("Give the number of squares per side");
+        String length = JOptionPane.showInputDialog("Give the length of the checkerboard");
+        try {
+          f.generateCheckerboard(Integer.parseInt(nsps), Integer.parseInt(length));
+        }
+        catch (Exception ex) {
+          ex.printStackTrace();
+        }
+
+
+      }
+    });
+    imagePicture.addMouseListener(
+        new MouseListener() {
+          @Override
+          public void mouseClicked(MouseEvent e) {
+
+          }
+
+          @Override
+          public void mousePressed(MouseEvent e) {
+            initX = e.getX();
+            initY = e.getY();
+
+          }
+
+          @Override
+          public void mouseReleased(MouseEvent e) {
+            endX = e.getX();
+            endY = e.getY();
+          }
+
+          @Override
+          public void mouseEntered(MouseEvent e) {}
+
+          @Override
+          public void mouseExited(MouseEvent e) {}
+        });
+  }
+
+  @Override
+  public void setImage(int[][][] imageData) {
+    BufferedImage image = ImageUtilities.toBufferImage(imageData);
+    System.out.println(image.getHeight());
+    imagePicture.setIcon(new ImageIcon(image));
+    eastPanel.removeAll();
+    jp = new JScrollPane(imagePicture);
+    int newwidth = Math.min(image.getWidth(), 500);
+    int newHeight = Math.min(image.getHeight(), 500);
+    jp.setPreferredSize(new Dimension(newwidth, newHeight));
+    eastPanel.add(jp);
+    this.setVisible(true);
+//    eastPanel.remove(0);
+//    eastPanel.add(imagePicture);
+//    jp.updateUI();
+    update();
+  }
+
+  private void update() {
+    this.repaint();
+    eastPanel.repaint();
+
+
+  }
+
+
+}

@@ -1,0 +1,36 @@
+load D:\cs5010\projects\hw4\res\users\manhattan-small.png
+dither
+save D:\cs5010\projects\hw4\res\users\manhattan-dither.png
+load D:\cs5010\projects\hw4\res\users\manhattan-small.png
+blur
+save D:\cs5010\projects\hw4\res\users\manhattan-blur.png
+sepia
+save D:\cs5010\projects\hw4\res\users\manhattan-blur-sepia.png
+checkerboard 4 100
+save D:\cs5010\projects\hw4\res\users\checkerboard.png
+load D:\cs5010\projects\hw4\res\users\hohggkphlv.jpeg
+dither
+save D:\cs5010\projects\hw4\res\users\hohggkphlv-dither.jpeg
+load D:\cs5010\projects\hw4\res\users\manhattan-small.png
+highlightEdge
+dither
+save D:\cs5010\projects\hw4\res\users\manhattan-edgedither.png
+flag France 30
+save D:\cs5010\projects\hw4\res\users\France-Flag.png
+rainbow vertical 500 500
+save D:\cs5010\projects\hw4\res\users\vertical-rainbow.png
+flag Norway 120
+save D:\cs5010\projects\hw4\res\users\norway.png
+rainbow horizontal 500 500
+save D:\cs5010\projects\hw4\res\users\vertical-rainbow.png
+flag Greece 30
+save D:\cs5010\projects\hw4\res\users\Greece-Flag.png
+flag Switzerland 32
+save D:\cs5010\projects\hw4\res\users\Switzerland-Flag.png
+load D:\cs5010\projects\hw4\res\users\manhattan-small.png
+sharpen
+save D:\cs5010\projects\hw4\res\users\manhattan-sharpen.png
+mosaics 5
+save D:\cs5010\projects\hw4\res\users\manhattan-sharpentobedeleted.png
+contrastEnhancement
+save D:\cs5010\projects\hw4\res\users\manhattan-sharpentobedeleted1.png
